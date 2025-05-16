@@ -99,6 +99,18 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.get("/get-user", authenticateToken, async (req, res) => {
+  const { user } = req.user; // <-- FIXED
+
+  const isUser = await User.findOne({ _id: user._id });
+
+  if (!isUser) {
+    return res.status(401).json({ error: true, message: "User not found" });
+  }
+
+  return res.status(200).json({ error: false, isUser: isUser });
+});
+
 //---------------------------------NOTES-------------------------
 //add note
 app.post("/add-note", authenticateToken, async (req, res) => {
