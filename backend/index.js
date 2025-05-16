@@ -23,6 +23,7 @@ app.get("/", (req, res) => {
   res.json({ data: "hello world" });
 });
 
+//---------------------------------USER-------------------------
 //Create Account
 app.post("/create-account", async (req, res) => {
   const { fullName, email, password } = req.body || {};
@@ -98,6 +99,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
+//---------------------------------NOTES-------------------------
 //add note
 app.post("/add-note", authenticateToken, async (req, res) => {
   const { title, content, tags } = req.body || {};
@@ -199,6 +201,31 @@ app.delete("/delete-note/:noteId", authenticateToken, async (req, res) => {
     await Note.deleteOne({ _id: noteId });
 
     return res.json({ error: false, message: "Note deleted successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: true, message: "Something went wrong" });
+  }
+});
+
+//Update isPinned Value
+app.put("/update-isPinned/:noteId", authenticateToken, async (req, res) => {
+  const noteId = req.params.noteId;
+  const { isPinned } = req.body || {};
+  const { user } = req.user;
+
+  try {
+    const note = await Note.findOne({ _id: noteId, userId: user._id });
+
+    if (!note) {
+      return res.status(404).json({ error: true, message: "Note not found" });
+    }
+
+    if (isPinned) note.isPinned = isPinned || false;
+
+    await note.save();
+
+    return res.json({ error: false, message: "Note updated successfully" });
   } catch (error) {
     return res
       .status(500)
