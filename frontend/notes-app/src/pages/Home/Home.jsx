@@ -44,7 +44,7 @@ const Home = () => {
         onRequestClose={() => {}}
         style={{ overlay: { backgroundColor: "rgba(0,0,0,0.2)" } }}
         contentLabel=""
-        className=""
+        className="w-[40%] max-h-3/4 bg-white rounded-md mx-auto mt-14 p5  overflow-scroll"
       >
         <AddEditNotes />
       </Modal>
