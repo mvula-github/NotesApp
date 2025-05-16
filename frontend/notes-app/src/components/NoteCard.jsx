@@ -22,7 +22,7 @@ const NoteCard = ({
 
         <MdOutlinePushPin
           className={`icon-btn ${isPinned ? "text-blue" : "text-slate-300"}`}
-          onClidk={onPinNote}
+          onClick={onPinNote}
         />
       </div>
 
