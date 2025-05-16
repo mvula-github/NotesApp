@@ -23,6 +23,8 @@ app.get("/", (req, res) => {
   res.json({ data: "hello world" });
 });
 
+//Backend is up and running
+
 //---------------------------------USER-------------------------
 //Create Account
 app.post("/create-account", async (req, res) => {
@@ -108,7 +110,10 @@ app.get("/get-user", authenticateToken, async (req, res) => {
     return res.status(401).json({ error: true, message: "User not found" });
   }
 
-  return res.status(200).json({ error: false, isUser: isUser });
+  return res.status(200).json({
+    error: false,
+    user: { fullNmae: isUser.fullName, email: isUser.email },
+  });
 });
 
 //---------------------------------NOTES-------------------------
