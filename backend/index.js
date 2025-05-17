@@ -81,7 +81,7 @@ app.post("/login", async (req, res) => {
 
   const userInfo = await User.findOne({ email: email });
 
-  if (userInfo.email == email && userInfo.password == password) {
+  if (userInfo.email === email && userInfo.password === password) {
     const user = { user: userInfo };
     const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_KEY, {
       expiresIn: process.env.TOKEN_EXPIRY,
@@ -112,7 +112,7 @@ app.get("/get-user", authenticateToken, async (req, res) => {
 
   return res.status(200).json({
     error: false,
-    user: { fullNmae: isUser.fullName, email: isUser.email },
+    user: { fullName: isUser.fullName, email: isUser.email },
   });
 });
 

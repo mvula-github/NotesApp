@@ -1,17 +1,38 @@
 import React, { useState } from "react";
 import TagInput from "../../components/TagInput";
 import { MdClose } from "react-icons/md";
+import axiosInstance from "../../utils/axiosinstance";
 
 // eslint-disable-next-line no-unused-vars
-const AddEditNotes = ({ noteData, type, onClose }) => {
+const AddEditNotes = ({ noteData, type, getAllNotes, onClose }) => {
   const [title, setTitle] = useState("");
-
   const [content, setContent] = useState("");
   const [tags, setTags] = useState([]);
 
   const [error, setError] = useState(null);
 
-  const addNewNote = async () => {};
+  const addNewNote = async () => {
+    try {
+      const response = await axiosInstance.post("/add-note", {
+        title,
+        content,
+        tags,
+      });
+
+      if (response.data && response.data.note) {
+        getAllNotes();
+        onClose();
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message);
+      }
+    }
+  };
   const editNote = async () => {};
 
   const handleAddNote = () => {
@@ -42,7 +63,7 @@ const AddEditNotes = ({ noteData, type, onClose }) => {
       >
         <MdClose className="text-xl text-slate-400" />
       </button>
-      <div classname="flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         <label className="input-label">TITLE</label>
         <br />
         <input
