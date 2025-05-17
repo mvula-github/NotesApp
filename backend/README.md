@@ -222,6 +222,118 @@ curl -X GET http://localhost:6125/get-all-notes -H "Authorization: Bearer <token
 
 ---
 
-## License
+# Theory Component
 
-MIT
+---
+
+## 3.1 Microservice Scenario (3 marks)
+
+**Scenario:**  
+This project is a Notes microservice, which allows users to register, log in, and manage their personal notes (create, read, update, delete). Each user’s notes are private and should only be accessible to them.
+
+**Importance of Data Security:**  
+It is crucial that this microservice’s data is kept secure because:
+
+- Notes may contain sensitive or personal information.
+- Unauthorized access could lead to privacy breaches or data leaks.
+- Data integrity must be maintained so users can trust the service.
+- If compromised, attackers could use the service as a vector to attack other systems or users.
+
+---
+
+## 3.2 Security Analysis (7 marks)
+
+**Frontend Security:**
+
+- **Token Storage:** JWT tokens are stored in `localStorage` after login or registration. This allows the frontend to authenticate requests to the backend.
+- **Route Protection:** The frontend can check for the presence of a valid token before allowing access to protected routes (e.g., `/dashboard`).
+- **Input Validation:** Email and password fields are validated on the client side to prevent malformed data from being sent to the backend.
+
+**Backend Security:**
+
+- **JWT Authentication:** All sensitive endpoints (e.g., `/add-note`, `/get-all-notes`, `/edit-note/:noteId`, `/delete-note/:noteId`) require a valid JWT token in the `Authorization` header.
+- **Password Storage:** (Should be implemented) Passwords should be hashed before being stored in the database. (If not yet implemented, this is a recommended improvement.)
+- **CORS:** The backend uses CORS middleware to control which origins can access the API.
+- **Input Validation:** The backend checks for required fields and validates input before processing requests.
+- **Error Handling:** The backend returns appropriate error messages and status codes, preventing information leakage.
+
+**Effectiveness:**  
+These strategies ensure that only authenticated users can access their own data, reduce the risk of unauthorized access, and help prevent common attacks such as CSRF and injection attacks. However, storing tokens in `localStorage` is vulnerable to XSS; for higher security, `httpOnly` cookies are recommended.
+
+---
+
+## 3.3 Authentication and Authorization Methods (10 marks)
+
+**Overview of Methods:**
+
+- **Session-based Authentication:** Stores session data on the server and a session ID in a cookie on the client.
+- **Token-based Authentication (JWT):** Issues a signed token to the client after login, which is sent with each request.
+- **OAuth2:** Used for delegated access, often with third-party providers (Google, Facebook).
+- **API Keys:** Simple tokens for service-to-service authentication.
+
+**Chosen Method: JWT Authentication**
+
+- **How it works:**
+  - On login/register, the backend issues a JWT containing user info.
+  - The frontend stores the token and sends it in the `Authorization` header for protected requests.
+  - The backend verifies the token on each request and grants access if valid.
+
+**Justification:**
+
+- **Stateless:** No need to store session data on the server, making it scalable.
+- **Widely Supported:** JWT is a standard for modern web APIs.
+- **Fine-grained Authorization:** User info can be encoded in the token, allowing for role-based access if needed.
+- **Simplicity:** Easy to implement and integrate with frontend frameworks.
+
+**References:**
+
+- [JWT Introduction](https://jwt.io/introduction)
+- [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
+
+---
+
+## 3.4 Real-world Security Failures and Analysis (10 marks)
+
+**Example 1: Facebook Access Token Leak (2018)**
+
+- **What happened:**  
+  A vulnerability in Facebook’s “View As” feature allowed attackers to steal access tokens, letting them take over user accounts.
+- **Cause:**  
+  Improper handling of session tokens and insufficient validation.
+- **Prevention:**
+  - Implement strict token validation and rotation.
+  - Use secure, httpOnly cookies for sensitive tokens.
+  - Regularly audit authentication flows.
+- **Reference:**  
+  [Facebook Security Update](https://about.fb.com/news/2018/09/security-update/)
+
+**Example 2: GitHub OAuth Token Exposure (2022)**
+
+- **What happened:**  
+  OAuth tokens for GitHub integrations were leaked due to a third-party compromise, allowing attackers to access private repositories.
+- **Cause:**  
+  Insufficient isolation of tokens and lack of proper revocation mechanisms.
+- **Prevention:**
+  - Use short-lived tokens and refresh tokens.
+  - Implement immediate revocation on compromise.
+  - Limit token scope and permissions.
+- **Reference:**  
+  [GitHub Security Incident](https://github.blog/2022-04-15-security-alert-stolen-oauth-user-tokens/)
+
+**Example 3: Twitter API Authorization Bypass (2020)**
+
+- **What happened:**  
+  Attackers exploited improper authorization checks to access direct messages and account data.
+- **Cause:**  
+  Missing or weak authorization logic on API endpoints.
+- **Prevention:**
+  - Enforce strict authorization checks on every endpoint.
+  - Use role-based access control.
+  - Regularly test endpoints for privilege escalation.
+- **Reference:**  
+  [Twitter Security Incident](https://www.zdnet.com/article/twitter-hackers-accessed-dms-of-36-high-profile-account-holders/)
+
+**Summary:**  
+These incidents highlight the importance of robust authentication and authorization, secure token handling, and regular security reviews. Proper implementation of these measures in your microservice helps prevent similar vulnerabilities.
+
+---
