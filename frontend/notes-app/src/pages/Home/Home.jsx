@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import Toast from "../../components/Toast";
 import EmptyCard from "../../components/EmptyCard";
 import NoNotesImg from "../../assets/icons8-nothing-found-100.png";
+import AdminUsers from "./AdminUsers";
 
 Modal.setAppElement("#root"); // Add this line after your imports
 
@@ -162,6 +163,7 @@ const Home = () => {
         type={showToastMsg.type}
         onClose={handleCloseToast}
       />
+      <AdminUsers user={userInfo} />
     </>
   );
 };

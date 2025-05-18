@@ -8,6 +8,7 @@ const User = require("./models/user.model");
 
 const app = express();
 app.use(express.json());
+
 app.use(cors({ origin: "*" }));
 
 // Connect to MongoDB
@@ -34,12 +35,10 @@ function authorizeRoles(...allowedRoles) {
       const token = auth.split(" ")[1];
       const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY);
       if (!allowedRoles.includes(decoded.role)) {
-        return res
-          .status(403)
-          .json({
-            error: true,
-            message: "Forbidden: insufficient permissions",
-          });
+        return res.status(403).json({
+          error: true,
+          message: "Forbidden: insufficient permissions",
+        });
       }
       req.user = decoded;
       next();
@@ -75,12 +74,10 @@ app.post("/register", async (req, res) => {
         .json({ error: true, message: "Password is required" });
     }
     if (password.length < 6) {
-      return res
-        .status(400)
-        .json({
-          error: true,
-          message: "Password must be at least 6 characters",
-        });
+      return res.status(400).json({
+        error: true,
+        message: "Password must be at least 6 characters",
+      });
     }
 
     const isUser = await User.findOne({ email: email });
@@ -211,6 +208,17 @@ app.get("/admin", authorizeRoles("admin"), (req, res) => {
   });
 });
 
+// Admin-only: List all users
+app.get("/users", authorizeRoles("admin"), async (req, res) => {
+  try {
+    const users = await User.find().select("fullName email role");
+    res.json({ error: false, users });
+  } catch (err) {
+    console.error("Error in /users:", err.message);
+    res.status(500).json({ error: true, message: "Something went wrong" });
+  }
+});
+
 app.listen(process.env.PORT, () => {
-  console.log("Auth microservice running on port", process.env.PORT);
+  console.log("Auth microservice running ");
 });
