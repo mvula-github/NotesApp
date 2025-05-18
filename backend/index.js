@@ -142,19 +142,16 @@ app.put("/edit-note/:noteId", authenticateToken, async (req, res) => {
 
 //get all notes
 app.get("/get-all-notes", authenticateToken, async (req, res) => {
-  const { user } = req.user;
-
+  const { user } = req.user || {};
   try {
-    const notes = await Note.find({ userId: user._id }).sort({
-      createdAt: -1,
-    });
-
+    const notes = await Note.find({ userId: user._id }).sort({ createdAt: -1 });
     return res.json({
       error: false,
       notes,
       message: "Notes retrieved successfully",
     });
   } catch (error) {
+    console.error("Error in /get-all-notes:", error);
     return res
       .status(500)
       .json({ error: true, message: "Something went wrong" });

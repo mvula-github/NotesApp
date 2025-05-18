@@ -41,12 +41,15 @@ app.post("/register", async (req, res) => {
   const user = new User({ fullName, email, password });
   await user.save();
 
-  const accessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN_KEY, {
-    expiresIn: process.env.TOKEN_EXPIRY,
-  });
+  // Only sign userId in the token for consistency with /me
+  const accessToken = jwt.sign(
+    { userId: user._id },
+    process.env.ACCESS_TOKEN_KEY,
+    { expiresIn: process.env.TOKEN_EXPIRY }
+  );
   return res.json({
     error: false,
-    user,
+    user: { fullName: user.fullName, email: user.email, _id: user._id },
     accessToken,
     message: "User created successfully",
   });
@@ -68,11 +71,12 @@ app.post("/login", async (req, res) => {
 
   const userInfo = await User.findOne({ email: email });
 
-  if (userInfo.email === email && userInfo.password === password) {
-    const user = { user: userInfo };
-    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_KEY, {
-      expiresIn: process.env.TOKEN_EXPIRY,
-    });
+  if (userInfo && userInfo.password === password) {
+    const accessToken = jwt.sign(
+      { userId: userInfo._id },
+      process.env.ACCESS_TOKEN_KEY,
+      { expiresIn: process.env.TOKEN_EXPIRY }
+    );
 
     return res.json({
       error: false,
@@ -90,18 +94,23 @@ app.post("/login", async (req, res) => {
 
 // Get user info (protected)
 app.get("/me", async (req, res) => {
-  const { user } = req.user; // <-- FIXED
+  try {
+    const auth = req.headers.authorization;
+    if (!auth)
+      return res.status(401).json({ error: true, message: "No token" });
 
-  const isUser = await User.findOne({ _id: user._id });
+    const token = auth.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY);
 
-  if (!isUser) {
-    return res.status(401).json({ error: true, message: "User not found" });
+    const user = await User.findById(decoded.userId).select("fullName email");
+    if (!user)
+      return res.status(404).json({ error: true, message: "User not found" });
+
+    res.json({ error: false, user });
+  } catch (err) {
+    console.error("Error in /me:", err.message);
+    res.status(500).json({ error: true, message: "Something went wrong" });
   }
-
-  return res.status(200).json({
-    error: false,
-    user: { fullName: isUser.fullName, email: isUser.email },
-  });
 });
 
 app.listen(process.env.PORT, () => {

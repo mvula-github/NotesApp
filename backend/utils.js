@@ -2,14 +2,19 @@ const jwt = require("jsonwebtoken");
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (!token) return res.sendStatus(401);
-
-  jwt.verify(token, process.env.ACCESS_TOKEN_KEY, (err, user) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
+  if (!authHeader) {
+    console.error("No Authorization header");
+    return res.sendStatus(401);
+  }
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_KEY);
+    req.user = { user: { _id: decoded.userId } }; // Make sure this matches your JWT payload!
     next();
-  });
+  } catch (err) {
+    console.error("JWT error:", err.message);
+    return res.sendStatus(403);
+  }
 }
 
 module.exports = { authenticateToken };
