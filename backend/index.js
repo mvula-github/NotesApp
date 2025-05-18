@@ -8,6 +8,7 @@ const { authenticateToken } = require("./utils");
 const axios = require("axios");
 const { body, validationResult, param } = require("express-validator");
 const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 
 //mongoDB connection
 mongoose.connect(process.env.CONNECTION_STRING);
@@ -21,6 +22,8 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({ origin: "*" }));
+
+app.use(helmet());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
