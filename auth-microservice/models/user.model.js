@@ -3,8 +3,9 @@ const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
   fullName: { type: String },
-  email: { type: String },
+  email: { type: String, unique: true },
   password: { type: String },
+  role: { type: String, enum: ["user", "admin"], default: "user" },
   createdOn: { type: Date, default: () => new Date().getTime() },
 });
 
