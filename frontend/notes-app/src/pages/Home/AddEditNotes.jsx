@@ -25,7 +25,7 @@ const AddEditNotes = ({
       });
 
       if (response.data && !response.data.error) {
-        showToastMessage("NOte Added Successfully");
+        showToastMessage("Note Added Successfully");
         getAllNotes();
         onClose();
       } else {
@@ -54,7 +54,7 @@ const AddEditNotes = ({
       });
 
       if (response.data && !response.data.error) {
-        showToastMessage("Note Deleted Successfully");
+        showToastMessage("Note Updated Successfully");
         getAllNotes();
         onClose();
       } else {

@@ -1,15 +1,34 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const EmptyCard = ({ imgSrc, message }) => {
+const EmptyCard = ({ imgSrc, message, alt }) => {
   return (
-    <div className="flex flex-col items-center justify-center mt-20">
-      <img src={imgSrc} alt="No Notes" className="w-60" />
-
-      <p className=" w-1/2 text-sm front-medium text-slate-700 text-center leading-7 mt-5">
+    <section
+      className="flex flex-col items-center justify-center mt-20"
+      aria-label="Empty State"
+    >
+      <figure>
+        <img
+          src={imgSrc}
+          alt={alt || "No notes illustration"}
+          className="w-60 max-w-full sm:w-40"
+          role="img"
+        />
+        <figcaption className="sr-only">
+          {alt || "No notes illustration"}
+        </figcaption>
+      </figure>
+      <p className="w-full max-w-md text-sm font-medium text-slate-700 text-center leading-7 mt-5">
         {message}
       </p>
-    </div>
+    </section>
   );
+};
+
+EmptyCard.propTypes = {
+  imgSrc: PropTypes.string.isRequired,
+  message: PropTypes.string.isRequired,
+  alt: PropTypes.string,
 };
 
 export default EmptyCard;
