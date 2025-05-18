@@ -40,14 +40,13 @@ const SignUp = () => {
       });
 
       if (response.data && response.data.error) {
-        setError(error.response.data.message);
+        setError(response.data.message);
         return;
       }
 
       if (response.data && response.data.accessToken) {
         localStorage.setItem("token", response.data.accessToken);
         navigate("/dashboard");
-        setError(error.response.data.message);
         return;
       }
     } catch (error) {

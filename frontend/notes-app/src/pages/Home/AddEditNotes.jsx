@@ -3,7 +3,13 @@ import TagInput from "../../components/TagInput";
 import { MdClose } from "react-icons/md";
 import axiosInstance from "../../utils/axiosinstance";
 
-const AddEditNotes = ({ noteData, type, getAllNotes, onClose }) => {
+const AddEditNotes = ({
+  noteData,
+  type,
+  getAllNotes,
+  onClose,
+  showToastMessage,
+}) => {
   const [title, setTitle] = useState(noteData?.title || "");
   const [content, setContent] = useState(noteData?.content || "");
   const [tags, setTags] = useState(noteData?.tags || []);
@@ -18,9 +24,12 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onClose }) => {
         tags,
       });
 
-      if (response.data && response.data.note) {
+      if (response.data && !response.data.error) {
+        showToastMessage("NOte Added Successfully");
         getAllNotes();
         onClose();
+      } else {
+        setError(response.data.message || "Failed to add note");
       }
     } catch (error) {
       if (
@@ -29,12 +38,14 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onClose }) => {
         error.response.data.message
       ) {
         setError(error.response.data.message);
+      } else {
+        setError("An unexpected error occurred. Please try again");
       }
     }
   };
 
   const editNote = async () => {
-    const noteId = noteData._id; // should be just the ID
+    const noteId = noteData._id;
     try {
       const response = await axiosInstance.put(`/edit-note/${noteId}`, {
         title,
@@ -42,9 +53,12 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onClose }) => {
         tags,
       });
 
-      if (response.data && response.data.note) {
+      if (response.data && !response.data.error) {
+        showToastMessage("Note Deleted Successfully");
         getAllNotes();
         onClose();
+      } else {
+        setError(response.data.message || "Failed to update note");
       }
     } catch (error) {
       if (
@@ -53,6 +67,8 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onClose }) => {
         error.response.data.message
       ) {
         setError(error.response.data.message);
+      } else {
+        setError("An unexpected error occurred. Please try again");
       }
     }
   };
