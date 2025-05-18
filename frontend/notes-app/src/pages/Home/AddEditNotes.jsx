@@ -3,11 +3,10 @@ import TagInput from "../../components/TagInput";
 import { MdClose } from "react-icons/md";
 import axiosInstance from "../../utils/axiosinstance";
 
-// eslint-disable-next-line no-unused-vars
 const AddEditNotes = ({ noteData, type, getAllNotes, onClose }) => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [tags, setTags] = useState([]);
+  const [title, setTitle] = useState(noteData?.title || "");
+  const [content, setContent] = useState(noteData?.content || "");
+  const [tags, setTags] = useState(noteData?.tags || []);
 
   const [error, setError] = useState(null);
 
@@ -33,7 +32,30 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onClose }) => {
       }
     }
   };
-  const editNote = async () => {};
+
+  const editNote = async () => {
+    const noteId = noteData._id; // should be just the ID
+    try {
+      const response = await axiosInstance.put(`/edit-note/${noteId}`, {
+        title,
+        content,
+        tags,
+      });
+
+      if (response.data && response.data.note) {
+        getAllNotes();
+        onClose();
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message);
+      }
+    }
+  };
 
   const handleAddNote = () => {
     if (!title) {
@@ -99,7 +121,7 @@ const AddEditNotes = ({ noteData, type, getAllNotes, onClose }) => {
         className="btn-primary font-medium mt-5 pt-3"
         onClick={handleAddNote}
       >
-        ADD
+        {type === "edit" ? "UPDATE" : "ADD"}
       </button>
     </div>
   );

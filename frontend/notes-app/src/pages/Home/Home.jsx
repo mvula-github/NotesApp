@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { FaInfo } from "react-icons/fa6";
 import axiosInstance from "../../utils/axiosinstance";
 import { useEffect } from "react";
+import Toast from "../../components/Toast";
 
 Modal.setAppElement("#root"); // Add this line after your imports
 
@@ -19,10 +20,29 @@ const Home = () => {
     data: null,
   });
 
+  const [showToastMsg, setShowToastMsg] = useState({
+    isShown: false,
+    type: "add",
+    data: null,
+  });
+
   const [allNotes, setAllNotes] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
   const navigate = useNavigate();
 
+  const handleEdit = (noteDetails) => {
+    setOpenAddEditModal({ isShown: true, data: noteDetails, type: "edit" });
+  };
+
+  const showToastMessage = (message, type) => {
+    setShowToastMsg({ isShown: true, message, type });
+  };
+
+  const handleCloseToast = () => {
+    setShowToastMsg({ isShown: false, message: "" });
+  };
+
+  //get user info
   const getUserInfo = async () => {
     try {
       const response = await axiosInstance.get("/get-user");
@@ -68,7 +88,9 @@ const Home = () => {
               content={item.content}
               tags={item.tags}
               isPinned={item.isPinned}
-              onEdit={() => {}}
+              onEdit={() => {
+                handleEdit(item);
+              }}
               onDelete={() => {}}
               onPinNote={() => {}}
             />
@@ -101,6 +123,13 @@ const Home = () => {
           getAllNotes={getAllNotes}
         />
       </Modal>
+
+      <Toast
+        isShown={showToastMsg.isShown}
+        message={showToastMsg.message}
+        type={showToastMsg.type}
+        onClose={handleCloseToast}
+      />
     </>
   );
 };
