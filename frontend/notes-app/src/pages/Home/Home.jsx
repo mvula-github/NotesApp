@@ -10,6 +10,8 @@ import { FaInfo } from "react-icons/fa6";
 import axiosInstance from "../../utils/axiosinstance";
 import { useEffect } from "react";
 import Toast from "../../components/Toast";
+import EmptyCard from "../../components/EmptyCard";
+import NoNotesImg from "../../assets/icons8-nothing-found-100.png";
 
 Modal.setAppElement("#root"); // Add this line after your imports
 
@@ -36,6 +38,9 @@ const Home = () => {
 
   const showToastMessage = (message, type) => {
     setShowToastMsg({ isShown: true, message, type });
+    setTimeout(() => {
+      setShowToastMsg({ isShown: false, message: "" });
+    }, 3000); // Toast will disappear after 3 seconds
   };
 
   const handleCloseToast = () => {
@@ -67,6 +72,26 @@ const Home = () => {
     }
   };
 
+  const deleteNote = async (data) => {
+    const noteId = data._id; // <-- fix here
+    try {
+      const response = await axiosInstance.delete(`/delete-note/${noteId}`);
+
+      if (response.data && !response.data.error) {
+        showToastMessage("Note Deleted Successfully", "delete");
+        getAllNotes();
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        console.log("An unexpected error occurred. Please try again");
+      }
+    }
+  };
+
   useEffect(() => {
     getAllNotes();
     getUserInfo();
@@ -77,25 +102,33 @@ const Home = () => {
   return (
     <>
       <Navbar userInfo={userInfo} />
-
       <div className="container mx-auto">
-        <div className="grid grid-cols-3 gap-4 mt-8">
-          {allNotes.map((item, index) => (
-            <NoteCard
-              key={item._id}
-              title={item.title}
-              date={item.createdOn}
-              content={item.content}
-              tags={item.tags}
-              isPinned={item.isPinned}
-              onEdit={() => {
-                handleEdit(item);
-              }}
-              onDelete={() => {}}
-              onPinNote={() => {}}
-            />
-          ))}
-        </div>
+        {allNotes.length > 0 ? (
+          <div className="grid grid-cols-3 gap-4 mt-8">
+            {allNotes.map((item, index) => (
+              <NoteCard
+                key={item._id}
+                title={item.title}
+                date={item.createdOn}
+                content={item.content}
+                tags={item.tags}
+                isPinned={item.isPinned}
+                onEdit={() => {
+                  handleEdit(item);
+                }}
+                onDelete={() => {
+                  deleteNote(item);
+                }}
+                onPinNote={() => {}}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyCard
+            imgSrc={NoNotesImg}
+            message={`start creating your first note! Click the 'Add' button to write down your very fist note`}
+          />
+        )}
       </div>
 
       <button
@@ -106,7 +139,6 @@ const Home = () => {
       >
         <MdAdd className="text-[32px] text-white" />
       </button>
-
       <Modal
         isOpen={openAddEditModal.isShown}
         onRequestClose={() => {}}
@@ -121,9 +153,9 @@ const Home = () => {
             setOpenAddEditModal({ isShown: false, type: "add", data: null });
           }}
           getAllNotes={getAllNotes}
+          showToastMessage={showToastMessage}
         />
       </Modal>
-
       <Toast
         isShown={showToastMsg.isShown}
         message={showToastMsg.message}
